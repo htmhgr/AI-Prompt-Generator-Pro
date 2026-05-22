@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#7c6af7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AI Prompt Generator Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ===== DESIGN TOKENS ===== */
+  :root {
+    --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+    --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+    --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+    --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+    --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+    --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+    --space-12: 3rem; --space-16: 4rem;
+    --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem;
+    --radius-xl: 1rem; --radius-full: 9999px;
+    --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    --font-body: 'IBM Plex Sans Arabic', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  [data-theme="dark"] {
+    --color-bg: #0e0f11;
+    --color-surface: #141618;
+    --color-surface-2: #1a1c1f;
+    --color-surface-offset: #1f2225;
+    --color-surface-dynamic: #252a2e;
+    --color-divider: #2a2d31;
+    --color-border: #333740;
+    --color-text: #e2e5ea;
+    --color-text-muted: #8b9099;
+    --color-text-faint: #4a5060;
+    --color-primary: #7c6af7;
+    --color-primary-hover: #6a55f0;
+    --color-primary-active: #5742e8;
+    --color-primary-highlight: #2a2540;
+    --color-accent: #f0a050;
+    --color-accent-hover: #e88a2a;
+    --color-green: #4caf7d;
+    --color-green-highlight: #1a2e23;
+    --color-blue: #5599e8;
+    --color-blue-highlight: #1a2540;
+    --color-red: #e05555;
+    --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.3);
+    --shadow-md: 0 4px 16px oklch(0 0 0 / 0.4);
+    --shadow-lg: 0 12px 40px oklch(0 0 0 / 0.5);
+  }
+
+  [data-theme="light"] {
+    --color-bg: #f5f5f7;
+    --color-surface: #ffffff;
+    --color-surface-2: #f8f8fa;
+    --color-surface-offset: #f0f0f4;
+    --color-surface-dynamic: #e8e8ee;
+    --color-divider: #e0e0e8;
+    --color-border: #d4d4dc;
+    --color-text: #1a1a2e;
+    --color-text-muted: #555570;
+    --color-text-faint: #9090a8;
+    --color-primary: #5840d8;
+    --color-primary-hover: #4830c0;
+    --color-primary-active: #3820a8;
+    --color-primary-highlight: #ede8ff;
+    --color-accent: #c07020;
+    --color-accent-hover: #a05800;
+    --color-green: #2d8a55;
+    --color-green-highlight: #e8f5ee;
+    --color-blue: #2255c8;
+    --color-blue-highlight: #e8eeff;
+    --color-red: #c82020;
+    --shadow-sm: 0 1px 3px oklch(0.2 0.01 280 / 0.08);
+    --shadow-md: 0 4px 16px oklch(0.2 0.01 280 / 0.1);
+    --shadow-lg: 0 12px 40px oklch(0.2 0.01 280 / 0.14);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+  body {
+    min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-sm);
+    color: var(--color-text); background: var(--color-bg);
+    transition: background var(--transition-interactive), color var(--transition-interactive);
+  }
+  button { cursor: pointer; border: none; background: none; font: inherit; color: inherit; }
+  input, textarea, select { font: inherit; color: inherit; }
+  img { display: block; max-width: 100%; height: auto; }
+
+  /* ===== LAYOUT ===== */
+  .app {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-height: 100dvh;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-3) var(--space-6);
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-sm);
+  }
+  .header-brand {
+    display: flex; align-items: center; gap: var(--space-3);
+  }
+  .logo-icon {
+    width: 36px; height: 36px; background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .brand-text { line-height: 1.2; }
+  .brand-name { font-size: var(--text-sm); font-weight: 700; color: var(--color-text); }
+  .brand-sub { font-size: var(--text-xs); color: var(--color-text-muted); }
+  .header-actions { display: flex; align-items: center; gap: var(--space-2); }
+  .btn-icon {
+    width: 44px; height: 44px; border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--color-text-muted); transition: all var(--transition-interactive);
+    background: var(--color-surface-offset);
+  }
+  .btn-icon:hover { color: var(--color-text); background: var(--color-surface-dynamic); }
+  .model-tabs {
+    display: flex; gap: var(--space-1);
+    background: var(--color-surface-offset);
+    padding: var(--space-1); border-radius: var(--radius-lg);
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+  .model-tab {
+    padding: var(--space-1) var(--space-3); border-radius: var(--radius-md);
+    font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.02em;
+    color: var(--color-text-muted);
+    transition: all var(--transition-interactive);
+  }
+  .model-tab.active {
+    background: var(--color-primary); color: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  .model-tab:hover:not(.active) { color: var(--color-text); background: var(--color-surface-dynamic); }
+
+  /* ===== MAIN GRID ===== */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-6);
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* ===== BUILDER PANEL ===== */
+  .builder-panel {
+    display: flex; flex-direction: column; gap: var(--space-4);
+  }
+
+  /* ===== SECTION CARD ===== */
+  .section-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    transition: box-shadow var(--transition-interactive);
+  }
+  .section-card:hover { box-shadow: var(--shadow-md); }
+  .section-header {
+    padding: var(--space-4) var(--space-5);
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--color-divider);
+    background: var(--color-surface-2);
+  }
+  .section-title {
+    display: flex; align-items: center; gap: var(--space-3);
+    font-size: var(--text-sm); font-weight: 700; color: var(--color-text);
+  }
+  .section-icon {
+    width: 28px; height: 28px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .icon-camera { background: color-mix(in oklch, var(--color-primary) 15%, var(--color-surface)); }
+  .icon-lens { background: color-mix(in oklch, var(--color-accent) 15%, var(--color-surface)); }
+  .icon-light { background: color-mix(in oklch, var(--color-green) 15%, var(--color-surface)); }
+  .icon-effect { background: color-mix(in oklch, var(--color-blue) 15%, var(--color-surface)); }
+  .icon-subject { background: color-mix(in oklch, #e060d0 15%, var(--color-surface)); }
+  .icon-mood { background: color-mix(in oklch, var(--color-red) 15%, var(--color-surface)); }
+
+  .realism-badge {
+    display: flex; align-items: center; gap: var(--space-2);
+    font-size: var(--text-xs); color: var(--color-text-muted);
+  }
+  .realism-bar {
+    width: 60px; height: 6px; background: var(--color-surface-dynamic);
+    border-radius: var(--radius-full); overflow: hidden;
+  }
+  .realism-fill {
+    height: 100%; border-radius: var(--radius-full);
+    background: linear-gradient(90deg, var(--color-green), var(--color-primary));
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .section-body { padding: var(--space-4) var(--space-5); }
+
+  /* ===== CHIP GRID ===== */
+  .chip-grid {
+    display: flex; flex-wrap: wrap; gap: var(--space-2);
+  }
+  .chip {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs); font-weight: 500;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-offset);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all var(--transition-interactive);
+    white-space: nowrap;
+  }
+  .chip:hover { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-highlight); }
+  .chip.selected { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-highlight); font-weight: 600; }
+  .chip.selected-accent { border-color: var(--color-accent); color: var(--color-accent); background: color-mix(in oklch, var(--color-accent) 12%, var(--color-surface)); }
+  .chip.selected-green { border-color: var(--color-green); color: var(--color-green); background: var(--color-green-highlight); }
+  .chip.selected-blue { border-color: var(--color-blue); color: var(--color-blue); background: var(--color-blue-highlight); }
+
+  /* ===== TIP CALLOUT ===== */
+  .tip-callout {
+    margin-top: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    background: color-mix(in oklch, var(--color-primary) 8%, var(--color-surface));
+    border: 1px solid color-mix(in oklch, var(--color-primary) 25%, transparent);
+    font-size: var(--text-xs); color: var(--color-text-muted);
+    line-height: 1.6;
+    display: none;
+  }
+  .tip-callout.visible { display: flex; gap: var(--space-2); align-items: flex-start; }
+  .tip-icon { flex-shrink: 0; color: var(--color-primary); margin-top: 1px; }
+
+  /* ===== SUBJECT INPUT ===== */
+  .subject-input-wrap { position: relative; }
+  .subject-input {
+    width: 100%; padding: var(--space-3) var(--space-4);
+    background: var(--color-surface-offset);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm); color: var(--color-text);
+    transition: all var(--transition-interactive);
+    outline: none;
+    resize: vertical;
+    min-height: 80px;
+    font-family: var(--font-body);
+  }
+  .subject-input::placeholder { color: var(--color-text-faint); }
+  .subject-input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 20%, transparent); }
+
+  /* ===== RATIO SELECTOR ===== */
+  .ratio-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-2); }
+  .ratio-chip {
+    padding: var(--space-2); border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-offset);
+    color: var(--color-text-muted);
+    cursor: pointer; text-align: center;
+    transition: all var(--transition-interactive);
+    font-size: var(--text-xs);
+  }
+  .ratio-chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .ratio-chip.selected { border-color: var(--color-primary); background: var(--color-primary-highlight); color: var(--color-primary); font-weight: 700; }
+  .ratio-chip .ratio-label { font-weight: 700; font-size: var(--text-xs); }
+  .ratio-chip .ratio-desc { font-size: 10px; color: var(--color-text-faint); margin-top: 2px; }
+
+  /* ===== QUALITY SLIDERS ===== */
+  .slider-row { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+  .slider-label { font-size: var(--text-xs); color: var(--color-text-muted); min-width: 80px; }
+  .slider-track { flex: 1; -webkit-appearance: none; height: 4px; border-radius: var(--radius-full); background: var(--color-surface-dynamic); outline: none; cursor: pointer; }
+  .slider-track::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px;
+    border-radius: var(--radius-full); background: var(--color-primary);
+    box-shadow: var(--shadow-sm); cursor: pointer;
+    transition: transform var(--transition-interactive);
+  }
+  .slider-track::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  .slider-val { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--color-primary); min-width: 28px; text-align: right; }
+
+  /* ===== RIGHT PANEL ===== */
+  .output-panel { display: flex; flex-direction: column; gap: var(--space-4); }
+
+  /* ===== PROMPT OUTPUT ===== */
+  .prompt-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    position: sticky; top: 72px;
+  }
+  .prompt-header {
+    padding: var(--space-3) var(--space-5);
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--color-divider);
+    background: var(--color-surface-2);
+  }
+  .prompt-title { font-size: var(--text-xs); font-weight: 700; color: var(--color-text); display: flex; align-items: center; gap: var(--space-2); }
+  .prompt-actions { display: flex; gap: var(--space-2); }
+  .btn-sm {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md); font-size: var(--text-xs); font-weight: 600;
+    transition: all var(--transition-interactive); cursor: pointer; border: none;
+  }
+  .btn-primary { background: var(--color-primary); color: #fff; }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+  .btn-secondary { background: var(--color-surface-offset); color: var(--color-text-muted); border: 1px solid var(--color-border); }
+  .btn-secondary:hover { background: var(--color-surface-dynamic); color: var(--color-text); }
+  .btn-success { background: var(--color-green); color: #fff; }
+
+  .prompt-body { padding: var(--space-5); }
+  .prompt-text {
+    font-family: var(--font-mono); font-size: 12px; line-height: 1.8;
+    color: var(--color-text); word-break: break-word;
+    min-height: 120px;
+    white-space: pre-wrap;
+  }
+  .prompt-empty { color: var(--color-text-faint); font-style: italic; font-family: var(--font-body); font-size: var(--text-xs); }
+
+  /* Syntax highlight */
+  .pt-subject { color: #7c6af7; }
+  .pt-camera { color: #f0a050; }
+  .pt-lens { color: #4caf7d; }
+  .pt-light { color: #5599e8; }
+  .pt-effect { color: #e060d0; }
+  .pt-quality { color: #e05555; }
+  .pt-param { color: #a0b0c0; }
+
+  /* ===== REALISM SCORE ===== */
+  .score-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-4) var(--space-5);
+  }
+  .score-title { font-size: var(--text-xs); font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-3); }
+  .score-main {
+    display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-3);
+  }
+  .score-number { font-size: var(--text-xl); font-weight: 700; font-family: var(--font-mono); color: var(--color-primary); transition: color 0.3s; }
+  .score-max { font-size: var(--text-xs); color: var(--color-text-faint); }
+  .score-track {
+    height: 8px; background: var(--color-surface-dynamic);
+    border-radius: var(--radius-full); overflow: hidden; margin-bottom: var(--space-3);
+  }
+  .score-fill {
+    height: 100%; border-radius: var(--radius-full);
+    background: linear-gradient(90deg, #4caf7d, #5599e8, #7c6af7);
+    transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .score-breakdown { display: flex; flex-direction: column; gap: var(--space-2); }
+  .score-row { display: flex; align-items: center; gap: var(--space-2); }
+  .score-row-label { font-size: var(--text-xs); color: var(--color-text-muted); min-width: 90px; }
+  .score-mini-bar { flex: 1; height: 4px; background: var(--color-surface-dynamic); border-radius: var(--radius-full); overflow: hidden; }
+  .score-mini-fill { height: 100%; border-radius: var(--radius-full); background: var(--color-primary); transition: width 0.4s; }
+  .score-row-val { font-size: var(--text-xs); font-family: var(--font-mono); color: var(--color-text-faint); min-width: 24px; text-align: right; }
+
+  /* ===== SAVED TEMPLATES ===== */
+  .templates-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+  }
+  .templates-header {
+    padding: var(--space-3) var(--space-5);
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--color-divider);
+    background: var(--color-surface-2);
+  }
+  .templates-title { font-size: var(--text-xs); font-weight: 700; color: var(--color-text); display: flex; align-items: center; gap: var(--space-2); }
+  .templates-list { padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); max-height: 300px; overflow-y: auto; }
+  .template-item {
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface-offset);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer; transition: all var(--transition-interactive);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-2);
+  }
+  .template-item:hover { border-color: var(--color-primary); background: var(--color-primary-highlight); }
+  .template-name { font-size: var(--text-xs); font-weight: 600; color: var(--color-text); margin-bottom: 2px; }
+  .template-preview { font-size: 10px; color: var(--color-text-faint); font-family: var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+  .template-delete { color: var(--color-text-faint); padding: 2px; border-radius: var(--radius-sm); transition: all var(--transition-interactive); flex-shrink: 0; }
+  .template-delete:hover { color: var(--color-red); background: color-mix(in oklch, var(--color-red) 15%, transparent); }
+  .templates-empty { padding: var(--space-6); text-align: center; color: var(--color-text-faint); font-size: var(--text-xs); }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed; bottom: var(--space-6); right: var(--space-6);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-5);
+    box-shadow: var(--shadow-lg);
+    font-size: var(--text-xs); font-weight: 600;
+    display: flex; align-items: center; gap: var(--space-2);
+    z-index: 999;
+    transform: translateY(20px); opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-icon { width: 20px; height: 20px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .toast-success .toast-icon { background: var(--color-green-highlight); color: var(--color-green); }
+
+  /* ===== DIVIDER LABEL ===== */
+  .sub-label { font-size: var(--text-xs); font-weight: 600; color: var(--color-text-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--space-2); display: block; }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--color-surface-dynamic); border-radius: var(--radius-full); }
+
+  /* ===== RESPONSIVE ===== */
+
+  @media (max-width: 1200px) {
+    .main-grid { grid-template-columns: 1fr 340px; }
+  }
+
+  @media (max-width: 900px) {
+    .header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-3);
+      padding: var(--space-3);
+    }
+    .header-actions {
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-3);
+    }
+    .main-grid {
+      grid-template-columns: 1fr;
+      padding: var(--space-3);
+    }
+    .prompt-card { position: static; }
+    .ratio-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .header-brand { align-items: flex-start; }
+    .brand-name { font-size: var(--text-base); }
+    .brand-sub { font-size: 12px; }
+    .model-tabs {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .model-tab {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .main-grid { padding: var(--space-2); gap: var(--space-3); }
+    .section-header, .section-body, .prompt-body, .score-card, .templates-header { padding-inline: var(--space-4); }
+    .section-header { align-items: flex-start; gap: var(--space-2); flex-direction: column; }
+    .realism-badge { width: 100%; justify-content: space-between; }
+    .ratio-grid { grid-template-columns: repeat(2, 1fr); }
+    .chip-grid { gap: var(--space-2); }
+    .chip {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      white-space: normal;
+      line-height: 1.4;
+    }
+    .prompt-header, .templates-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-3);
+    }
+    .prompt-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+    .btn-sm { min-height: 44px; }
+    .slider-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        'label val'
+        'track track';
+      gap: var(--space-2);
+      align-items: center;
+    }
+    .slider-label { grid-area: label; min-width: 0; }
+    .slider-track { grid-area: track; width: 100%; }
+    .slider-val { grid-area: val; }
+    .template-item {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .template-preview { max-width: 100%; }
+    .toast {
+      right: var(--space-3);
+      left: var(--space-3);
+      bottom: var(--space-3);
+    }
+  }
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="logo-icon">✦</div>
+      <div class="brand-text">
+        <div class="brand-name">AI Prompt Generator Pro</div>
+        <div class="brand-sub">HATEM HAGAR · Prompt Engineering Suite 2026</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="model-tabs">
+        <button class="model-tab active" onclick="setModel('midjourney', event)">Midjourney v7</button>
+        <button class="model-tab" onclick="setModel('flux', event)">FLUX Pro</button>
+        <button class="model-tab" onclick="setModel('nanobananapro', event)">NanoBananaPro</button>
+        <button class="model-tab" onclick="setModel('gpt2', event)">GPT-2 Prompt Mode</button>
+      </div>
+      <button class="btn-icon" onclick="toggleTheme()" data-theme-toggle aria-label="تبديل الوضع">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <div class="main-grid">
+
+    <!-- LEFT: BUILDER -->
+    <div class="builder-panel">
+
+      <!-- SUBJECT -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon icon-subject">🎯</div>
+            الموضوع الرئيسي
+          </div>
+        </div>
+        <div class="section-body">
+          <textarea class="subject-input" id="subjectInput" placeholder="اكتب موضوع صورتك... مثل: امرأة عربية في مقهى حديث، منتج عطر فاخر، منظر طبيعي في اليمن" oninput="buildPrompt()"></textarea>
+        </div>
+      </div>
+
+      <!-- CAMERA -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon icon-camera">📷</div>
+            نوع الكاميرا
+          </div>
+          <div class="realism-badge">
+            <span>تأثير الواقعية</span>
+            <div class="realism-bar"><div class="realism-fill" id="cameraBar" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="section-body">
+          <span class="sub-label">Full-Frame Professional</span>
+          <div class="chip-grid" id="cameraChips">
+            <button class="chip" data-group="camera" data-val="shot on Canon EOS 5D Mark IV" data-score="88" data-tip="الكانون 5D هي المعيار الذهبي في التصوير التجاري - تمنح تفاصيل جلد حقيقية وألوان دافئة. في Midjourney v7 ترفع درجة الواقعية بشكل ملحوظ.">Canon EOS 5D Mark IV</button>
+            <button class="chip" data-group="camera" data-val="shot on Sony A7R V" data-score="92" data-tip="سوني A7R V تعطي أعلى دقة تفصيل بين كل الخيارات. مثالية للطباعة الكبيرة والمنتجات. FLUX Pro يستجيب لها بشكل استثنائي في 2026.">Sony A7R V</button>
+            <button class="chip" data-group="camera" data-val="shot on Nikon Z9" data-score="87" data-tip="نيكون Z9 تمنح تباين ألوان محسوب ودقة عالية. تعمل جيداً في بورتريه المشاهير والتصوير الرياضي الاحترافي.">Nikon Z9</button>
+            <button class="chip" data-group="camera" data-val="shot on Hasselblad X2D 100C" data-score="96" data-tip="هاسيلبلاد هي أغلى كاميرا في القائمة وتمنح أفضل درجة واقعية. الـ AI يُدرك اسمها ويُولّد صوراً بمستوى Medium Format حقيقي.">Hasselblad X2D 100C</button>
+            <button class="chip" data-group="camera" data-val="shot on Fujifilm GFX 100S" data-score="90" data-tip="فوجي GFX تمنح طابع فيلم أنالوج مع دقة رقمية. ممتازة للتصوير العصري الذي يريد دفئاً بصرياً.">Fujifilm GFX 100S</button>
+            <button class="chip" data-group="camera" data-val="shot on Leica Q3" data-score="91" data-tip="لايكا تمنح جمالية Street Photography الاحترافية. اسمها في البرومت يُولّد صوراً بطابع أوروبي راقٍ.">Leica Q3</button>
+            <button class="chip" data-group="camera" data-val="Cinematic 35mm film photography" data-score="89" data-tip="35mm Film هو البديل الكلاسيكي. يمنح حبة فيلم طبيعية وألوان دافئة مميزة تختلف عن الكاميرات الرقمية تماماً.">35mm Film</button>
+            <button class="chip" data-group="camera" data-val="shot on Polaroid SX-70" data-score="75" data-tip="بولارويد يمنح طابع نوستالجي فريد. مفيد للأفكار الإبداعية والتصوير العاطفي.">Polaroid SX-70</button>
+          </div>
+          <div class="tip-callout" id="cameraTip">
+            <span class="tip-icon">💡</span>
+            <span id="cameraTipText"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- LENS -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon icon-lens">🔭</div>
+            نوع العدسة
+          </div>
+          <div class="realism-badge">
+            <span>تأثير الواقعية</span>
+            <div class="realism-bar"><div class="realism-fill" id="lensBar" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="section-body">
+          <span class="sub-label">Portrait & Storytelling</span>
+          <div class="chip-grid" id="lensChips">
+            <button class="chip" data-group="lens" data-val="50mm f/1.8 prime lens" data-score="85" data-tip="الـ 50mm هي عدسة العين البشرية - تُحاكي ما نراه بالضبط. تمنح Bokeh ناعم وبُعد بصري طبيعي. الأكثر استخداماً في أعمال FLUX Pro.">50mm f/1.8</button>
+            <button class="chip" data-group="lens" data-val="85mm f/1.2 portrait lens, creamy bokeh" data-score="95" data-tip="الـ 85mm هي ملكة عدسات البورتريه! تمنح أفضل bokeh في أي قائمة. تضخيم خفيف يجعل الوجه أجمل. رائعة في Midjourney v7.">85mm f/1.2 ★ أفضل بورتريه</button>
+            <button class="chip" data-group="lens" data-val="35mm f/1.4 wide angle lens" data-score="83" data-tip="الـ 35mm تمنح زاوية أوسع مع طابع تصوير شارع. تُضيف محيط طبيعي حول الشخص وتجعل البيئة جزءاً من القصة.">35mm f/1.4</button>
+            <button class="chip" data-group="lens" data-val="135mm f/2.0 telephoto lens" data-score="90" data-tip="الـ 135mm تعزل الموضوع بقوة مع bokeh عميق جداً. ممتازة للتصوير الرياضي والشخصيات من مسافة.">135mm f/2.0</button>
+            <button class="chip" data-group="lens" data-val="24mm f/1.4 ultra-wide lens" data-score="80" data-tip="24mm للمشاهد الواسعة والمناظر. يمنح شعور العمق والضخامة في التصوير المعماري والطبيعة.">24mm f/1.4</button>
+            <button class="chip" data-group="lens" data-val="100mm macro lens, extreme detail" data-score="88" data-tip="الماكرو يكشف تفاصيل لا ترى بالعين المجردة. مثالي للمجوهرات، الحشرات، المنتجات الدقيقة، والزهور.">100mm Macro</button>
+            <button class="chip" data-group="lens" data-val="anamorphic lens, cinematic flare" data-score="92" data-tip="العدسة الأنامورفيك هي سر التصوير السينمائي! تمنح flare أفقي مميز وبُعد سينمائي حقيقي. مؤثرة جداً في FLUX.">Anamorphic Cinematic</button>
+            <button class="chip" data-group="lens" data-val="tilt-shift lens, miniature effect" data-score="78" data-tip="Tilt-shift تخلق تأثير المجسمات. تمنح Bokeh نمطي من الأعلى والأسفل وتجعل المشاهد الحقيقية تبدو كألعاب.">Tilt-Shift</button>
+          </div>
+          <div class="tip-callout" id="lensTip">
+            <span class="tip-icon">💡</span>
+            <span id="lensTipText"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIGHTING -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon icon-light">💡</div>
+            نمط الإضاءة
+          </div>
+          <div class="realism-badge">
+            <span>تأثير الواقعية</span>
+            <div class="realism-bar"><div class="realism-fill" id="lightBar" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="section-body">
+          <span class="sub-label">Natural Light</span>
+          <div class="chip-grid" id="lightChips">
+            <button class="chip" data-group="light" data-val="golden hour warm sunlight, long shadows" data-score="94" data-tip="Golden Hour هي الساعة الذهبية قبل غروب الشمس. تمنح أجمل ظل في التصوير. في نماذج 2026، هذه الكلمة ترفع الدفء والإثارة الدرامية بشكل كبير.">Golden Hour ✦</button>
+            <button class="chip" data-group="light" data-val="soft overcast diffused natural light" data-score="88" data-tip="الضوء الملبد طبيعي ومتساوٍ بدون ظل قاسٍ. المفضل لتصوير الموضة والمنتجات لأنه لا يُسبب إشباعاً مفرطاً.">Overcast Natural</button>
+            <button class="chip" data-group="light" data-val="blue hour twilight, moody ambient glow" data-score="87" data-tip="الساعة الزرقاء بعد الغروب مباشرة. تمنح لون أزرق عميق مع نور دافئ من المصابيح. تأثير سينمائي رائع.">Blue Hour</button>
+            <button class="chip" data-group="light" data-val="harsh midday sunlight, strong shadows" data-score="80" data-tip="الضوء القوي في الظهيرة يمنح ظلال حادة وكثافة لونية مرتفعة. مثالي للمشاهد الصحراوية والتصوير الإيطالي الكلاسيكي.">Harsh Midday</button>
+          </div>
+          <span class="sub-label" style="margin-top:var(--space-4); display:block">Studio & Artificial</span>
+          <div class="chip-grid">
+            <button class="chip" data-group="light" data-val="soft studio lighting with octabox, clean shadows" data-score="91" data-tip="الـ Octabox هو المعيار في استوديوهات البورتريه الاحترافية. يمنح ضوء ناعم متساوٍ مع ظل خفيف طبيعي. مثالي للمنتجات والوجوه.">Soft Studio Octabox</button>
+            <button class="chip" data-group="light" data-val="dramatic Rembrandt lighting, deep shadows" data-score="93" data-tip="رامبرانت هي إضاءة كلاسيكية من الفن التشكيلي. مثلث الضوء على الخد يمنح عمقاً فنياً لا مثيل له. مدرجة في أفضل أنواع الإضاءة في Midjourney.">Rembrandt ★</button>
+            <button class="chip" data-group="light" data-val="ring light beauty lighting, glamorous" data-score="82" data-tip="Ring Light أصبحت معروفة من TikTok والبيوتي. تمنح توهجاً دائري في العيون. مثالية لمحتوى وسائل التواصل.">Ring Light Beauty</button>
+            <button class="chip" data-group="light" data-val="cinematic volumetric light rays, atmospheric" data-score="96" data-tip="أشعة الضوء المرئية هي الأكثر تأثيراً بصرياً! في 2026، هذه الكلمات تُفعّل ميزة عمق جوي متقدمة في كل من Midjourney وFLUX. ترفع الدرجة السينمائية للصورة كثيراً.">Cinematic Volumetric ✦</button>
+            <button class="chip" data-group="light" data-val="neon light reflections, cyberpunk glow" data-score="85" data-tip="ضوء النيون يمنح طابع سايبربنك. يجعل أي مشهد يبدو ليلياً ومستقبلياً. الأكثر شيوعاً في تصوير المدن الآسيوية.">Neon Cyberpunk</button>
+            <button class="chip" data-group="light" data-val="candle light warm intimate glow" data-score="84" data-tip="ضوء الشمعة يمنح دفء وصميمية نادرة. مثالي للصور الاحتفالية والرومانسية والتراثية.">Candlelight Intimate</button>
+          </div>
+          <div class="tip-callout" id="lightTip">
+            <span class="tip-icon">💡</span>
+            <span id="lightTipText"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- EFFECTS -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon icon-effect">🎞️</div>
+            تأثيرات فيلم وما بعد المعالجة
+          </div>
+          <div class="realism-badge">
+            <span>تأثير الواقعية</span>
+            <div class="realism-bar"><div class="realism-fill" id="effectBar" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="section-body">
+          <span class="sub-label">Film Simulation</span>
+          <div class="chip-grid" id="effectChips">
+            <button class="chip" data-group="effect" data-val="subtle film grain, organic texture" data-score="90" data-tip="حبة الفيلم الخفيفة هي أهم إضافة لجعل الصورة الرقمية تبدو حقيقية. بدونها تبدو الصور 'بلاستيكية'. مُحسّنة كثيراً في نماذج 2026.">Film Grain Subtle</button>
+            <button class="chip" data-group="effect" data-val="heavy film grain, analog photography feel" data-score="83" data-tip="حبة فيلم قوية لطابع أنالوج كلاسيكي. مثالية للأفكار الفنية والـ editorial الجريء.">Film Grain Heavy</button>
+            <button class="chip" data-group="effect" data-val="Kodak Portra 400 film simulation, warm tones" data-score="94" data-tip="كوداك بورترا 400 هو أشهر فيلم تصوير في التاريخ. ألوانه الدافئة خاصة في الجلد أصبحت معياراً عالمياً. الـ AI تعلّم نمطه بشكل مثالي.">Kodak Portra 400 ★</button>
+            <button class="chip" data-group="effect" data-val="Fuji Velvia 50, vivid saturated colors" data-score="88" data-tip="فوجي فيلفيا 50 تمنح ألوان مشبعة وحادة بشكل استثنائي. الأفضل للطبيعة وأزهار التصوير الياباني.">Fuji Velvia 50</button>
+            <button class="chip" data-group="effect" data-val="Ilford HP5 black and white film" data-score="89" data-tip="إيلفورد HP5 هو أشهر أفلام الأبيض والأسود. يمنح تباين راقٍ وعمق تشكيلي. كلاسيكي في التصوير الفني.">Ilford HP5 B&W</button>
+          </div>
+          <span class="sub-label" style="margin-top:var(--space-4); display:block">Post-Processing Look</span>
+          <div class="chip-grid">
+            <button class="chip" data-group="effect" data-val="cinematic color grading, teal and orange" data-score="92" data-tip="Teal & Orange هو أشهر Color Grade في هوليوود. يمنح أي صورة مظهر فيلم سينمائي احترافي. شائع جداً في FLUX و Midjourney 2026.">Teal & Orange Cinematic</button>
+            <button class="chip" data-group="effect" data-val="moody desaturated color grade, muted tones" data-score="86" data-tip="تقليل التشبع يمنح طابع رصين ودرامي. شائع في تصوير الجريمة والأفلام النورية وإعلانات الفاخرة.">Moody Desaturated</button>
+            <button class="chip" data-group="effect" data-val="high contrast black and white editorial" data-score="87" data-tip="الأبيض والأسود بتباين عالٍ يمنح حدة فنية. شائع في Vogue والمجلات الراقية.">High Contrast B&W</button>
+            <button class="chip" data-group="effect" data-val="cross-processed expired film look" data-score="79" data-tip="الفيلم المنتهي الصلاحية يمنح ألوان غير متوقعة وطابع فني تجريبي. مثالي للمشاريع الإبداعية الجريئة.">Expired Film Cross</button>
+            <button class="chip" data-group="effect" data-val="RAW unprocessed look, natural colors" data-score="95" data-tip="في 2026، طلب الـ RAW Look يُخبر النموذج بعدم المبالغة في التعديل. الأكثر تأثيراً على مصداقية الصورة ومؤشر الواقعية.">RAW Natural Look ✦</button>
+          </div>
+          <div class="tip-callout" id="effectTip">
+            <span class="tip-icon">💡</span>
+            <span id="effectTipText"></span>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- QUICK PRESETS -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon icon-mood">🚀</div>
+            Presets سريعة
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="chip-grid">
+            <button class="chip selected-green" onclick="applyPreset('portrait')">Portrait Realism</button>
+            <button class="chip selected-accent" onclick="applyPreset('product')">Luxury Product</button>
+            <button class="chip selected-blue" onclick="applyPreset('cinematic')">Cinematic Scene</button>
+            <button class="chip selected" onclick="applyPreset('social')">Social Media</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ASPECT RATIO -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon icon-mood">📐</div>
+            نسبة الأبعاد
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="ratio-grid" id="ratioChips">
+            <button class="ratio-chip" data-ratio="--ar 9:16">
+              <div class="ratio-label">9:16</div>
+              <div class="ratio-desc">ستوري</div>
+            </button>
+            <button class="ratio-chip" data-ratio="--ar 4:5">
+              <div class="ratio-label">4:5</div>
+              <div class="ratio-desc">إنستقرام</div>
+            </button>
+            <button class="ratio-chip selected" data-ratio="--ar 1:1">
+              <div class="ratio-label">1:1</div>
+              <div class="ratio-desc">مربع</div>
+            </button>
+            <button class="ratio-chip" data-ratio="--ar 3:2">
+              <div class="ratio-label">3:2</div>
+              <div class="ratio-desc">بورتريه</div>
+            </button>
+            <button class="ratio-chip" data-ratio="--ar 16:9">
+              <div class="ratio-label">16:9</div>
+              <div class="ratio-desc">سينما</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUALITY PARAMS -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon icon-subject">⚙️</div>
+            معاملات الجودة
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="slider-row">
+            <span class="slider-label">Stylize</span>
+            <input type="range" class="slider-track" id="stylizeSlider" min="0" max="1000" value="100" step="50" oninput="updateSlider('stylize'); buildPrompt()">
+            <span class="slider-val" id="stylizeVal">100</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">Chaos</span>
+            <input type="range" class="slider-track" id="chaosSlider" min="0" max="100" value="0" step="5" oninput="updateSlider('chaos'); buildPrompt()">
+            <span class="slider-val" id="chaosVal">0</span>
+          </div>
+          <div class="slider-row">
+            <span class="slider-label">Quality</span>
+            <input type="range" class="slider-track" id="qualitySlider" min="1" max="2" value="1" step="0.5" oninput="updateSlider('quality'); buildPrompt()">
+            <span class="slider-val" id="qualityVal">1</span>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- end builder-panel -->
+
+    <!-- RIGHT: OUTPUT -->
+    <div class="output-panel">
+
+      <!-- PROMPT OUTPUT -->
+      <div class="prompt-card">
+        <div class="prompt-header">
+          <div class="prompt-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Master Prompt
+          </div>
+          <div class="prompt-actions">
+            <button class="btn-sm btn-secondary" onclick="saveTemplate()">💾 حفظ</button>
+            <button class="btn-sm btn-primary" id="copyBtn" onclick="copyPrompt()">📋 نسخ</button>
+          </div>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-text" id="promptOutput">
+            <span class="prompt-empty">← ابدأ باختيار الإعدادات من اليسار لبناء الـ Prompt...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- REALISM SCORE -->
+      <div class="score-card">
+        <div class="score-title">🎯 مؤشر الواقعية 2026</div>
+        <div class="score-main">
+          <div class="score-number" id="scoreNumber">0</div>
+          <div class="score-max">/ 100</div>
+        </div>
+        <div class="score-track">
+          <div class="score-fill" id="scoreFill" style="width: 0%"></div>
+        </div>
+        <div class="score-breakdown">
+          <div class="score-row">
+            <span class="score-row-label">📷 الكاميرا</span>
+            <div class="score-mini-bar"><div class="score-mini-fill" id="scoreCamera" style="width:0%"></div></div>
+            <span class="score-row-val" id="scoreCameraVal">—</span>
+          </div>
+          <div class="score-row">
+            <span class="score-row-label">🔭 العدسة</span>
+            <div class="score-mini-bar"><div class="score-mini-fill" id="scoreLens" style="width:0%"></div></div>
+            <span class="score-row-val" id="scoreLensVal">—</span>
+          </div>
+          <div class="score-row">
+            <span class="score-row-label">💡 الإضاءة</span>
+            <div class="score-mini-bar"><div class="score-mini-fill" id="scoreLight" style="width:0%"></div></div>
+            <span class="score-row-val" id="scoreLightVal">—</span>
+          </div>
+          <div class="score-row">
+            <span class="score-row-label">🎞️ التأثيرات</span>
+            <div class="score-mini-bar"><div class="score-mini-fill" id="scoreEffect" style="width:0%"></div></div>
+            <span class="score-row-val" id="scoreEffectVal">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAVED TEMPLATES -->
+      <div class="templates-card">
+        <div class="templates-header">
+          <div class="templates-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            Templates المحفوظة
+          </div>
+          <button class="btn-sm btn-secondary" onclick="clearAllTemplates()">مسح الكل</button>
+        </div>
+        <div id="templatesList">
+          <div class="templates-empty" id="templatesEmpty">لا توجد templates محفوظة بعد.<br>ابنِ prompt واضغط "حفظ" ✦</div>
+        </div>
+      </div>
+
+    </div> <!-- end output-panel -->
+  </div> <!-- end main-grid -->
+</div> <!-- end app -->
+
+<!-- TOAST -->
+<div class="toast toast-success" id="toast">
+  <div class="toast-icon">✓</div>
+  <span id="toastMsg">تم النسخ!</span>
+</div>
+
+<script>
+  // ===== STATE =====
+  const state = {
+    model: 'midjourney',
+    outputMode: 'text',
+    camera: null, cameraScore: 0, cameraTip: '',
+    lens: null, lensScore: 0, lensTip: '',
+    light: null, lightScore: 0, lightTip: '',
+    effect: null, effectScore: 0, effectTip: '',
+    ratio: '--ar 1:1',
+    subject: '',
+    stylize: 100, chaos: 0, quality: 1,
+    templates: []
+  };
+
+  // ===== THEME =====
+  function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    const btn = document.querySelector('[data-theme-toggle]');
+    if (next === 'light') {
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+    } else {
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    }
+  }
+
+  // ===== MODEL =====
+  function setModel(m, ev) {
+    state.model = m;
+    document.querySelectorAll('.model-tab').forEach(t => t.classList.remove('active'));
+    if (ev && ev.target) ev.target.classList.add('active');
+    buildPrompt();
+    renderSuggestions();
+  }
+
+  // ===== CHIPS =====
+  document.querySelectorAll('.chip[data-group]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const group = chip.dataset.group;
+      const colorMap = { camera: 'selected', lens: 'selected-accent', light: 'selected-green', effect: 'selected-blue' };
+      const cls = colorMap[group] || 'selected';
+      document.querySelectorAll(`.chip[data-group="${group}"]`).forEach(c => c.classList.remove(cls));
+      chip.classList.add(cls);
+      state[group] = chip.dataset.val;
+      state[group + 'Score'] = parseInt(chip.dataset.score);
+      state[group + 'Tip'] = chip.dataset.tip;
+      // bar
+      const bar = document.getElementById(group + 'Bar');
+      if (bar) bar.style.width = chip.dataset.score + '%';
+      // tip
+      const tipEl = document.getElementById(group + 'Tip');
+      const tipText = document.getElementById(group + 'TipText');
+      if (tipEl && tipText) {
+        tipText.textContent = chip.dataset.tip;
+        tipEl.classList.add('visible');
+      }
+      buildPrompt();
+    });
+  });
+
+  // ===== RATIO =====
+  document.querySelectorAll('.ratio-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.ratio-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      state.ratio = chip.dataset.ratio;
+      buildPrompt();
+    });
+  });
+
+
+  // ===== OUTPUT MODE =====
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('[data-output]');
+    if (!btn) return;
+    document.querySelectorAll('[data-output]').forEach(x => x.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.outputMode = btn.dataset.output;
+    buildPrompt();
+  });
+
+  // ===== SLIDERS =====
+  function updateSlider(name) {
+    const val = document.getElementById(name + 'Slider').value;
+    document.getElementById(name + 'Val').textContent = val;
+    state[name] = parseFloat(val);
+  }
+
+  // ===== SUBJECT =====
+  document.getElementById('subjectInput').addEventListener('input', function() {
+    state.subject = this.value.trim();
+    buildPrompt();
+  });
+
+  // ===== BUILD PROMPT =====
+  function buildPrompt() {
+    const parts = [];
+    const isMJ = state.model === 'midjourney';
+    const isFlux = state.model === 'flux';
+    const isNano = state.model === 'nanobananapro';
+    const isGPT2 = state.model === 'gpt2';
+
+    const subject = state.subject || 'a stunning photograph';
+    if (state.subject) parts.push({ text: state.subject, cls: 'pt-subject' });
+    else parts.push({ text: subject, cls: 'pt-subject' });
+
+    if (state.camera) parts.push({ text: state.camera, cls: 'pt-camera' });
+    if (state.lens) parts.push({ text: state.lens, cls: 'pt-lens' });
+    if (state.light) parts.push({ text: state.light, cls: 'pt-light' });
+    if (state.effect) parts.push({ text: state.effect, cls: 'pt-effect' });
+
+    let qualityKw = 'photorealistic, ultra detailed, sharp focus, professional photography';
+    if (isMJ) qualityKw = 'photorealistic, ultra detailed, sharp focus, 8K resolution, professional photography';
+    if (isFlux) qualityKw = 'photorealistic, highly detailed, natural skin texture, realistic light transport, professional quality';
+    if (isNano) qualityKw = 'hyperreal, grounded material response, coherent shadows, detailed textures, physically plausible image synthesis';
+    if (isGPT2) qualityKw = 'plain descriptive prompt, clear nouns first, natural phrasing, low ambiguity';
+    parts.push({ text: qualityKw, cls: 'pt-quality' });
+
+    let textPrompt = '';
+    if (isMJ) {
+      textPrompt = parts.map(p => p.text).join(', ') + ` ${state.ratio} --v 7 --s ${state.stylize} --c ${state.chaos} --q ${state.quality}`;
+    } else if (isFlux) {
+      textPrompt = parts.map(p => p.text).join(', ') + `, ${state.ratio.replace('--ar ', 'aspect_ratio: ')}, output: clean realism, prompt_weighting: balanced`;
+    } else if (isNano) {
+      textPrompt = `PRIMARY SUBJECT: ${subject}. CAPTURE MODE: ${state.camera || 'premium camera capture'}. OPTICS: ${state.lens || 'natural prime lens'}. LIGHT BEHAVIOR: ${state.light || 'realistic soft light'}. FINISH: ${state.effect || 'raw natural look'}. TARGET: photoreal, physically grounded, believable textures, high realism.`;
+    } else if (isGPT2) {
+      textPrompt = `Create a realistic image of ${subject}. Use ${state.camera || 'a professional camera'} with ${state.lens || 'a natural lens'}. The lighting should be ${state.light || 'soft and believable'}. Add ${state.effect || 'minimal post-processing'}. Keep the result realistic and easy to understand.`;
+    }
+
+    const jsonPrompt = {
+      model: state.model,
+      subject,
+      camera: state.camera || null,
+      lens: state.lens || null,
+      lighting: state.light || null,
+      effect: state.effect || null,
+      realism_keywords: qualityKw,
+      aspect_ratio: state.ratio.replace('--ar ', ''),
+      parameters: {
+        stylize: state.stylize,
+        chaos: state.chaos,
+        quality: state.quality
+      },
+      prompt: textPrompt
+    };
+
+    const promptEl = document.getElementById('promptOutput');
+    if (state.outputMode === 'json') {
+      const rawJson = JSON.stringify(jsonPrompt, null, 2);
+      promptEl.textContent = rawJson;
+      promptEl.dataset.raw = rawJson;
+    } else {
+      promptEl.innerHTML = parts.map(p => `<span class="${p.cls}">${escHtml(p.text)}</span>`).join('<span style="color:var(--color-text-faint)">, </span>') + `<span style="color:var(--color-text-faint)">${isNano || isGPT2 ? ' ' : ', '}</span><span class="pt-param">${escHtml(textPrompt.split(qualityKw).slice(1).join(qualityKw) ? textPrompt.replace(parts.map(p => p.text).join(', ') + (isMJ ? ' ' : ', '), '') : '')}</span>`;
+      promptEl.dataset.raw = textPrompt;
+      if (isNano || isGPT2) promptEl.textContent = textPrompt;
+    }
+
+    updateScore();
+    renderSuggestions();
+  }
+
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ===== SCORE =====
+  function updateScore() {
+    const scores = {
+      camera: state.cameraScore,
+      lens: state.lensScore,
+      light: state.lightScore,
+      effect: state.effectScore
+    };
+    const vals = Object.values(scores).filter(v => v > 0);
+    const avg = vals.length ? Math.round(vals.reduce((a,b)=>a+b,0) / vals.length) : 0;
+    // bonus for combinations
+    const filledCount = vals.length;
+    const bonus = filledCount >= 4 ? 5 : filledCount >= 3 ? 3 : filledCount >= 2 ? 1 : 0;
+    const final = Math.min(100, avg + bonus);
+
+    const numEl = document.getElementById('scoreNumber');
+    const fillEl = document.getElementById('scoreFill');
+    numEl.textContent = final;
+    fillEl.style.width = final + '%';
+    numEl.style.color = final >= 90 ? 'var(--color-green)' : final >= 75 ? 'var(--color-primary)' : final >= 50 ? 'var(--color-accent)' : 'var(--color-text-muted)';
+
+    // breakdown
+    ['camera','lens','light','effect'].forEach(k => {
+      const s = scores[k];
+      document.getElementById('score' + k.charAt(0).toUpperCase() + k.slice(1)).style.width = s + '%';
+      document.getElementById('score' + k.charAt(0).toUpperCase() + k.slice(1) + 'Val').textContent = s ? s : '—';
+    });
+  }
+
+  // ===== COPY =====
+  function copyPrompt() {
+    const raw = document.getElementById('promptOutput').dataset.raw;
+    if (!raw || raw.includes('ابدأ')) return showToast('⚠️ ابنِ prompt أولاً', false);
+    navigator.clipboard.writeText(raw).then(() => showToast('✓ تم نسخ الـ Prompt!', true));
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ تم النسخ';
+    btn.className = 'btn-sm btn-success';
+    setTimeout(() => { btn.textContent = '📋 نسخ'; btn.className = 'btn-sm btn-primary'; }, 2000);
+  }
+
+  // ===== SAVE TEMPLATE =====
+  function saveTemplate() {
+    const raw = document.getElementById('promptOutput').dataset.raw;
+    if (!raw || raw.includes('ابدأ')) return showToast('⚠️ ابنِ prompt أولاً', false);
+    const name = state.subject ? state.subject.substring(0, 30) : 'Template ' + (state.templates.length + 1);
+    state.templates.push({ name, prompt: raw, id: Date.now() });
+    renderTemplates();
+    showToast('💾 تم حفظ الـ Template!', true);
+  }
+
+  function renderTemplates() {
+    const list = document.getElementById('templatesList');
+    const empty = document.getElementById('templatesEmpty');
+    if (state.templates.length === 0) {
+      if (empty) empty.style.display = '';
+      list.innerHTML = '<div class="templates-empty" id="templatesEmpty">لا توجد templates محفوظة بعد.<br>ابنِ prompt واضغط "حفظ" ✦</div>';
+      return;
+    }
+    list.innerHTML = '<div class="templates-list">' + state.templates.map(t => `
+      <div class="template-item" onclick="loadTemplate(${t.id})">
+        <div>
+          <div class="template-name">${escHtml(t.name)}</div>
+          <div class="template-preview">${escHtml(t.prompt.substring(0, 60))}...</div>
+        </div>
+        <button class="template-delete" onclick="deleteTemplate(event, ${t.id})" title="حذف">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    `).join('') + '</div>';
+  }
+
+  function loadTemplate(id) {
+    const t = state.templates.find(x => x.id === id);
+    if (!t) return;
+    const promptEl = document.getElementById('promptOutput');
+    promptEl.textContent = t.prompt;
+    promptEl.dataset.raw = t.prompt;
+    showToast('📂 تم تحميل الـ Template', true);
+  }
+
+  function deleteTemplate(e, id) {
+    e.stopPropagation();
+    state.templates = state.templates.filter(x => x.id !== id);
+    renderTemplates();
+  }
+
+  function clearAllTemplates() {
+    state.templates = [];
+    renderTemplates();
+  }
+
+  // ===== TOAST =====
+  function showToast(msg, success) {
+    const t = document.getElementById('toast');
+    const m = document.getElementById('toastMsg');
+    m.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+
+
+  function applyPreset(type) {
+    const map = {
+      portrait: {
+        camera: 'Hasselblad X2D 100C', lens: '85mm f/1.2', light: 'Rembrandt ★', effect: 'RAW Natural Look ✦', ratio: '3:2'
+      },
+      product: {
+        camera: 'Sony A7R V', lens: '100mm Macro', light: 'Soft Studio Octabox', effect: 'Kodak Portra 400 ★', ratio: '4:5'
+      },
+      cinematic: {
+        camera: '35mm Film', lens: 'Anamorphic Cinematic', light: 'Cinematic Volumetric ✦', effect: 'Teal & Orange Cinematic', ratio: '16:9'
+      },
+      social: {
+        camera: 'Canon EOS 5D Mark IV', lens: '50mm f/1.8', light: 'Golden Hour ✦', effect: 'RAW Natural Look ✦', ratio: '4:5'
+      }
+    };
+    const p = map[type];
+    if (!p) return;
+    const selectChip = (group, textPart) => {
+      const el = [...document.querySelectorAll(`[data-group="${group}"]`)].find(x => x.textContent.includes(textPart));
+      if (el) el.click();
+    };
+    selectChip('camera', p.camera);
+    selectChip('lens', p.lens);
+    selectChip('light', p.light);
+    selectChip('effect', p.effect);
+    const ratioBtn = [...document.querySelectorAll('.ratio-chip')].find(x => x.textContent.includes(p.ratio));
+    if (ratioBtn) ratioBtn.click();
+    showToast('🚀 تم تطبيق الـ Preset', true);
+  }
+
+  function renderSuggestions() {
+    const box = document.getElementById('suggestionsBox');
+    if (!box) return;
+    const suggestions = [];
+
+    if (!state.camera) suggestions.push('اختر كاميرا احترافية لرفع مصداقية التفاصيل، وأفضلها حالياً Hasselblad أو Sony A7R V.');
+    if (!state.lens) suggestions.push('أضف عدسة محددة؛ 85mm f/1.2 أفضل للبورتريه الواقعي و50mm أفضل للطابع الطبيعي العام.');
+    if (!state.light) suggestions.push('الإضاءة أهم من أي عنصر آخر؛ جرّب Golden Hour أو Cinematic Volumetric لنتائج أكثر إقناعاً.');
+    if (!state.effect) suggestions.push('استخدم RAW Natural Look أو Kodak Portra 400 لتقليل المظهر الاصطناعي الزائد.');
+    if (state.model === 'midjourney' && state.stylize > 250) suggestions.push('خفض Stylize إذا أردت واقعية أعلى؛ القيم المرتفعة تجعل Midjourney أكثر فنية وأقل توثيقية.');
+    if (state.model === 'midjourney' && state.chaos > 20) suggestions.push('Chaos المرتفع يزيد التنوع لكنه قد يقلل الاتساق الواقعي. استخدم 0-10 للمخرجات التجارية.');
+    if (state.model === 'flux') suggestions.push('FLUX يستفيد من أوصاف المواد والجلد والضوء الفيزيائي أكثر من الزخرفة اللفظية.');
+    if (state.model === 'nanobananapro') suggestions.push('NanoBananaPro يعمل أفضل مع تقسيم البرومت إلى كتل: SUBJECT ثم OPTICS ثم LIGHT ثم FINISH.');
+    if (state.model === 'gpt2') suggestions.push('GPT-2 Prompt Mode يحتاج لغة مباشرة وبسيطة؛ تجنب التراكيب الطويلة والصفات المتراكمة.');
+    if (state.outputMode === 'json') suggestions.push('وضع JSON مثالي لحفظ البرومبتات وربطها مع n8n أو أي واجهة API لاحقاً، خاصة في workflows الهاتفية والسريعة.');
+
+    if (suggestions.length === 0) suggestions.push('التركيبة الحالية قوية. جرّب فقط تغيير الإضاءة أو العدسة لاختبار الفروقات الدقيقة في الواقعية.');
+
+    box.innerHTML = suggestions.slice(0, 6).map(s => `<div class="tip-callout visible" style="display:flex"><span class="tip-icon">✦</span><span>${escHtml(s)}</span></div>`).join('');
+  }
+
+  function optimizePrompt() {
+    if (!state.camera) {
+      const best = [...document.querySelectorAll('[data-group="camera"]')].find(x => x.textContent.includes('Hasselblad'));
+      best && best.click();
+    }
+    if (!state.lens) {
+      const best = [...document.querySelectorAll('[data-group="lens"]')].find(x => x.textContent.includes('85mm f/1.2'));
+      best && best.click();
+    }
+    if (!state.light) {
+      const best = [...document.querySelectorAll('[data-group="light"]')].find(x => x.textContent.includes('Golden Hour'));
+      best && best.click();
+    }
+    if (!state.effect) {
+      const best = [...document.querySelectorAll('[data-group="effect"]')].find(x => x.textContent.includes('RAW Natural Look'));
+      best && best.click();
+    }
+    if (state.model === 'midjourney') {
+      document.getElementById('stylizeSlider').value = 100;
+      document.getElementById('chaosSlider').value = 5;
+      document.getElementById('qualitySlider').value = 1.5;
+      updateSlider('stylize'); updateSlider('chaos'); updateSlider('quality');
+    }
+    if (state.model === 'gpt2') {
+      document.getElementById('stylizeSlider').value = 0;
+      document.getElementById('chaosSlider').value = 0;
+      document.getElementById('qualitySlider').value = 1;
+      updateSlider('stylize'); updateSlider('chaos'); updateSlider('quality');
+    }
+    buildPrompt();
+    showToast('✨ تم تحسين البرومت تلقائياً', true);
+  }
+
+  // Init
+  buildPrompt();
+  renderSuggestions();
+</script>
+</body>
+</html>
